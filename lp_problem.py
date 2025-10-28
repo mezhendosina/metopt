@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Tuple, Optional
-
+from enum import Enum
 
 class OptimizationType(Enum):
     """Type of optimization: minimize or maximize"""
@@ -38,11 +38,12 @@ class LPProblem:
 class SimplexTableau:
     """Represents a Simplex tableau for solving LP problems"""
     
-    def __init__(self, tableau: np.ndarray, basis: List[int], 
-                 num_original_vars: int, is_auxiliary: bool = False):
+    def __init__(self, tableau: np.ndarray, basis: List[int],
+                 num_original_vars: int, num_slack_vars: int, is_auxiliary: bool = False):
         self.tableau = tableau
         self.basis = basis
         self.num_original_vars = num_original_vars
+        self.num_slack_vars = num_slack_vars
         self.is_auxiliary = is_auxiliary
         self.num_rows, self.num_cols = tableau.shape
     

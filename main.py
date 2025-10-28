@@ -4,7 +4,7 @@ from auxilaty_problem import create_auxiliary_problem
 from canonical_form import convert_to_canonical_form
 from lp_problem import *
 from read_file import read_lp_problem
-import solve_simplex
+from solve_simplex import solve_simplex, transition_to_main_problem
 
 
 
@@ -43,7 +43,7 @@ def solve_lp_problem(filename: str, output_filename: str = None) -> None:
         return
     
     # Step 4: Transition to main problem
-    main_tableau = solve_simplex.transition_to_main_problem(aux_tableau, objective_coeffs)
+    main_tableau = transition_to_main_problem(aux_tableau, objective_coeffs)
     
     if main_tableau is None:
         result = "No solution: Feasible region is empty"
@@ -68,9 +68,8 @@ def solve_lp_problem(filename: str, output_filename: str = None) -> None:
         result = "No solution: Problem is unbounded or infeasible"
         print(result)
     else:
-        # Adjust objective value if original problem was minimization
-        if problem.optimization_type == OptimizationType.MIN:
-            objective_value = -objective_value
+        # The objective value from the tableau is correct for minimization problems
+        # that have been converted to maximization. No final sign flip is needed.
         
         result = f"Optimal solution found!\n\n"
         result += f"Optimization type: {problem.optimization_type.value}\n"

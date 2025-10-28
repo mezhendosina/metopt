@@ -1,6 +1,4 @@
-
 from lp_problem import *
-from main import find_pivot_row, pivot_operation
 from utils import *
 
 
@@ -75,7 +73,7 @@ def transition_to_main_problem(aux_tableau: SimplexTableau,
     
     # Also check if any artificial variables are still in basis with non-zero values
     num_original_vars = aux_tableau.num_original_vars
-    num_slack = len(aux_tableau.basis)
+    num_slack = aux_tableau.num_slack_vars
     artificial_start = num_original_vars + num_slack
     
     artificial_in_basis = False
@@ -116,5 +114,5 @@ def transition_to_main_problem(aux_tableau: SimplexTableau,
     print(f"Removed artificial variables")
     print(f"New tableau dimensions: {new_tableau.shape}")
     
-    return SimplexTableau(new_tableau, aux_tableau.basis.copy(), 
-                         num_original_vars, is_auxiliary=False)
+    return SimplexTableau(new_tableau, aux_tableau.basis.copy(),
+                         num_original_vars, num_slack, is_auxiliary=False)

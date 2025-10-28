@@ -1,0 +1,5 @@
+Optimal solution found!
+
+Optimization type: min
+Optimal point: x* = (0.000000, 0.000000, 2.000000, 4.000000)
+Objective function value: f(x*) = 8.000000

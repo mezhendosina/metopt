@@ -25,39 +25,48 @@ def convert_to_canonical_form(problem: LPProblem) -> Tuple[np.ndarray, np.ndarra
     else:
         objective_coeffs = problem.objective_coefficients.copy()
     
-    constraint_matrix = []
-    rhs_vector = []
-    slack_var_count = 0
+    # Count slack/surplus variables needed
+    slack_var_count = sum(1 for _, ctype, _ in problem.constraints if ctype != ConstraintType.EQ)
+    
+    num_original_vars = problem.num_variables
+    total_vars = num_original_vars + slack_var_count
+    
+    # Initialize constraint matrix and RHS vector
+    constraint_matrix = np.zeros((len(problem.constraints), total_vars))
+    rhs_vector = np.zeros(len(problem.constraints))
+    
+    current_slack_index = 0
     
     for i, (coeffs, ctype, rhs) in enumerate(problem.constraints):
-        row = coeffs.copy()
         
-        # Handle negative RHS
+        # Handle negative RHS by flipping the constraint
         if rhs < 0:
-            row = -row
-            rhs = -rhs
-            # Flip constraint type
+            constraint_coeffs = -coeffs
+            rhs_val = -rhs
             if ctype == ConstraintType.LE:
                 ctype = ConstraintType.GE
             elif ctype == ConstraintType.GE:
                 ctype = ConstraintType.LE
             print(f"Constraint {i+1}: Multiplied by -1 (negative RHS)")
+        else:
+            constraint_coeffs = coeffs.copy()
+            rhs_val = rhs
+            
+        # Copy original coefficients
+        constraint_matrix[i, :num_original_vars] = constraint_coeffs
+        rhs_vector[i] = rhs_val
         
         # Add slack/surplus variables
         if ctype == ConstraintType.LE:
-            slack_var_count += 1
-            print(f"Constraint {i+1}: Added slack variable s{slack_var_count}")
+            constraint_matrix[i, num_original_vars + current_slack_index] = 1.0
+            print(f"Constraint {i+1}: Added slack variable s{current_slack_index + 1}")
+            current_slack_index += 1
         elif ctype == ConstraintType.GE:
-            slack_var_count += 1
-            print(f"Constraint {i+1}: Added surplus variable (subtracted)")
-        
-        constraint_matrix.append(row)
-        rhs_vector.append(rhs)
+            constraint_matrix[i, num_original_vars + current_slack_index] = -1.0
+            print(f"Constraint {i+1}: Added surplus variable s{current_slack_index + 1} (subtracted)")
+            current_slack_index += 1
     
-    constraint_matrix = np.array(constraint_matrix)
-    rhs_vector = np.array(rhs_vector)
-    
-    print(f"\nCanonical form created with {problem.num_variables} original variables")
+    print(f"\nCanonical form created with {num_original_vars} original variables")
     print(f"Total slack/surplus variables: {slack_var_count}")
     
     return objective_coeffs, constraint_matrix, rhs_vector

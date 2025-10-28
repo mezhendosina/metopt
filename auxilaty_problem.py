@@ -16,7 +16,7 @@ def create_auxiliary_problem(objective_coeffs: np.ndarray,
     print("="*60)
     
     num_constraints = len(constraint_matrix)
-    num_original_vars = len(objective_coeffs)
+    num_original_vars = original_problem.num_variables
     
     # Determine which constraints need artificial variables
     artificial_needed = []
@@ -53,7 +53,7 @@ def create_auxiliary_problem(objective_coeffs: np.ndarray,
     
     for i in range(num_constraints):
         # Original variable coefficients
-        tableau[i + 1, :num_original_vars] = constraint_matrix[i]
+        tableau[i + 1, :num_original_vars] = constraint_matrix[i, :num_original_vars]
         
         # Slack/surplus variable
         if slack_positions[i] >= 0:
@@ -78,6 +78,6 @@ def create_auxiliary_problem(objective_coeffs: np.ndarray,
     print(f"Initial basis: {basis}")
     print(f"Tableau dimensions: {tableau.shape}")
     
-    return SimplexTableau(tableau, basis, num_original_vars, is_auxiliary=True)
+    return SimplexTableau(tableau, basis, num_original_vars, num_slack, is_auxiliary=True)
 
 
